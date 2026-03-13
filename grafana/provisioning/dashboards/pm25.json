@@ -1,0 +1,145 @@
+{
+  "title": "Temperature & Pressure Trends",
+  "uid": "sensorhouse-pm25",
+  "description": "Hourly temperature and pressure trends from BMP180 sensors (dataset has no PM2.5 data).",
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "version": 2,
+  "tags": ["sensorhouse", "temperature", "pressure"],
+  "time": {"from": "2019-06-01T00:00:00Z", "to": "2019-07-01T00:00:00Z"},
+  "timepicker": {},
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "title": "Hourly Trends",
+      "type": "row"
+    },
+    {
+      "id": 2,
+      "title": "Hourly Average Temperature (°C)",
+      "type": "timeseries",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 1},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT hour AS time, round(avgMerge(avg_temp), 2) AS temperature FROM sensors.readings_hourly GROUP BY hour ORDER BY hour",
+          "refId": "A",
+          "format": 0,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "color": {"mode": "fixed", "fixedColor": "orange"},
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null},
+              {"color": "green", "value": 15},
+              {"color": "yellow", "value": 25},
+              {"color": "red", "value": 35}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "Hourly Average Pressure (hPa)",
+      "type": "timeseries",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 11},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT hour AS time, round(avgMerge(avg_pressure) / 100, 2) AS pressure_hpa FROM sensors.readings_hourly GROUP BY hour ORDER BY hour",
+          "refId": "A",
+          "format": 0,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pressurehpa",
+          "color": {"mode": "fixed", "fixedColor": "purple"},
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{"color": "green", "value": null}]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 21},
+      "id": 3,
+      "title": "Top Sensors by Temperature",
+      "type": "row"
+    },
+    {
+      "id": 4,
+      "title": "Top 10 Hottest Sensors (Avg °C)",
+      "type": "bargauge",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 22},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT toString(sensor_id) AS sensor, round(avgMerge(avg_temp), 2) AS avg_temp FROM sensors.readings_hourly GROUP BY sensor_id HAVING avg_temp > 0 ORDER BY avg_temp DESC LIMIT 10",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": true},
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null},
+              {"color": "green", "value": 15},
+              {"color": "yellow", "value": 25},
+              {"color": "red", "value": 35}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    }
+  ]
+}

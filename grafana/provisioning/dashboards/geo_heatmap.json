@@ -1,0 +1,209 @@
+{
+  "title": "Geo Heatmap",
+  "uid": "sensorhouse-geo-heatmap",
+  "description": "Geographic distribution of sensor values aggregated onto a lat/lon grid.",
+  "refresh": "10m",
+  "schemaVersion": 39,
+  "version": 2,
+  "tags": ["sensorhouse", "geo"],
+  "time": {"from": "2019-06-01T00:00:00Z", "to": "2019-07-01T00:00:00Z"},
+  "timepicker": {},
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "title": "Sensor Location Grid",
+      "type": "row"
+    },
+    {
+      "id": 4,
+      "title": "Temperature Geo Heatmap (1° grid)",
+      "description": "Sensor average temperature plotted on a world map. Color scale: blue (cold) → yellow → red (hot). One point per 1° lat/lon cell.",
+      "type": "geomap",
+      "gridPos": {"h": 18, "w": 24, "x": 0, "y": 1},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT round(lat) AS lat, round(lon) AS lon, round(avg(avg_temperature), 2) AS avg_temperature FROM (SELECT anyMerge(lat) AS lat, anyMerge(lon) AS lon, avgMerge(avg_temp) AS avg_temperature FROM sensors.readings_hourly GROUP BY sensor_id) GROUP BY lat, lon HAVING avg_temperature > 0 AND lat BETWEEN -90 AND 90 AND lon BETWEEN -180 AND 180 ORDER BY avg_temperature DESC LIMIT 1000",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "view": {
+          "id": "fit",
+          "lat": 50,
+          "lon": 15,
+          "zoom": 4
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showZoom": true,
+          "showAttribution": true
+        },
+        "tooltip": {
+          "mode": "details"
+        },
+        "layers": [
+          {
+            "type": "default",
+            "name": "Layer 0",
+            "config": {},
+            "opacity": 1,
+            "tooltip": true
+          },
+          {
+            "type": "heatmap",
+            "name": "Temperature Heatmap",
+            "config": {
+              "weight": {
+                "field": "avg_temperature",
+                "fixed": 1,
+                "max": 1,
+                "min": 0,
+                "mode": "field"
+              },
+              "radius": 25,
+              "blur": 15,
+              "opacity": 0.75
+            },
+            "location": {
+              "mode": "coords",
+              "latitude": "lat",
+              "longitude": "lon"
+            },
+            "opacity": 0.75,
+            "tooltip": true
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null},
+              {"color": "green", "value": 10},
+              {"color": "yellow", "value": 25},
+              {"color": "red", "value": 35}
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "avg_temperature"},
+            "properties": [
+              {"id": "displayName", "value": "Avg Temp (°C)"},
+              {"id": "unit", "value": "celsius"}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Temperature by Location (2° grid) — Table",
+      "description": "Average temperature aggregated onto a 2-degree lat/lon grid.",
+      "type": "table",
+      "gridPos": {"h": 14, "w": 24, "x": 0, "y": 19},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT round(lat / 2) * 2 AS lat, round(lon / 2) * 2 AS lon, round(avg(avg_temperature), 2) AS avg_temperature, sum(sensor_hours) AS sensor_hours FROM (SELECT anyMerge(lat) AS lat, anyMerge(lon) AS lon, avgMerge(avg_temp) AS avg_temperature, count() AS sensor_hours FROM sensors.readings_hourly GROUP BY sensor_id) GROUP BY lat, lon HAVING avg_temperature > 0 ORDER BY avg_temperature DESC LIMIT 500",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {"show": false, "reducer": ["sum"], "countRows": false, "fields": ""}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"align": "auto", "displayMode": "auto", "inspect": false}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "lat"},
+            "properties": [{"id": "displayName", "value": "Latitude"}, {"id": "unit", "value": "degree"}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "lon"},
+            "properties": [{"id": "displayName", "value": "Longitude"}, {"id": "unit", "value": "degree"}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "avg_temperature"},
+            "properties": [
+              {"id": "displayName", "value": "Avg Temp (°C)"},
+              {"id": "unit", "value": "celsius"},
+              {"id": "custom.displayMode", "value": "color-background"},
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "blue", "value": null},
+                    {"color": "green", "value": 15},
+                    {"color": "yellow", "value": 25},
+                    {"color": "red", "value": 35}
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "sensor_hours"},
+            "properties": [{"id": "displayName", "value": "Sensor-Hours"}]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Average Pressure by Location (2° grid) — Table",
+      "type": "table",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 33},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT round(lat / 2) * 2 AS lat, round(lon / 2) * 2 AS lon, round(avg(avg_pressure), 1) AS avg_pressure FROM (SELECT anyMerge(lat) AS lat, anyMerge(lon) AS lon, avgMerge(avg_pressure) AS avg_pressure FROM sensors.readings_hourly GROUP BY sensor_id) GROUP BY lat, lon HAVING avg_pressure > 0 ORDER BY avg_pressure DESC LIMIT 200",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {"show": false, "reducer": ["sum"], "countRows": false, "fields": ""}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"align": "auto", "displayMode": "auto", "inspect": false}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "avg_pressure"},
+            "properties": [
+              {"id": "displayName", "value": "Avg Pressure (hPa)"},
+              {"id": "unit", "value": "pressurehpa"}
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

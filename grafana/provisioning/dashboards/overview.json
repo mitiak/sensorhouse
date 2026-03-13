@@ -1,0 +1,160 @@
+{
+  "title": "SensorHouse Overview",
+  "uid": "sensorhouse-overview",
+  "description": "Sensor network activity — total rows, distinct sensors, and daily reading counts.",
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["sensorhouse", "overview"],
+  "time": {"from": "2019-06-01T00:00:00Z", "to": "2019-07-01T00:00:00Z"},
+  "timepicker": {},
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "title": "At a Glance",
+      "type": "row"
+    },
+    {
+      "id": 2,
+      "title": "Total Readings",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 1},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT count() AS total FROM sensors.readings",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "fixed", "fixedColor": "blue"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Distinct Sensors",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 1},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT uniq(sensor_id) AS sensors FROM sensors.readings",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "fixed", "fixedColor": "green"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "Hourly Aggregation Rows",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 1},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT count() AS rows FROM sensors.readings_hourly",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "fixed", "fixedColor": "purple"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+      "id": 5,
+      "title": "Daily Activity",
+      "type": "row"
+    },
+    {
+      "id": 6,
+      "title": "Daily Reading Count",
+      "type": "timeseries",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 6},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT date AS time, count() AS readings FROM sensors.readings GROUP BY date ORDER BY date",
+          "refId": "A",
+          "format": 0,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      }
+    }
+  ]
+}

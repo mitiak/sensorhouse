@@ -1,5 +1,14 @@
 # Changelog
 
+## Milestone 4 — REST API & Grafana Dashboards (2026-03-13)
+
+- `api/db.py` — lazy-initialized `clickhouse-connect` singleton client; reads host/port/credentials from env with sensible defaults
+- `api/main.py` — full FastAPI implementation with 7 endpoints: `/health`, `/health/db`, `/api/v1/daily-counts`, `/api/v1/hottest-days`, `/api/v1/sensors/{id}/history`, `/api/v1/top-pm25`, `/api/v1/geo-heatmap`; metric allowlists return 400 for invalid input; hourly rollup endpoints use correct `-Merge` combinators (`avgMerge`, `anyMerge`, `sumMerge`) against `AggregatingMergeTree` columns
+- OpenAPI docs auto-generated at `/docs` (Swagger UI)
+- `clickhouse/init/08_add_ttl.sql` — `ALTER TABLE sensors.readings MODIFY TTL date + INTERVAL 5 YEAR`; auto-expires data older than 5 years during background merges
+- Four Grafana dashboards provisioned from JSON in `grafana/provisioning/dashboards/`: **Overview** (total rows, distinct sensors, daily time series), **PM2.5 Air Quality** (hourly avg trend + top-10 bar gauge), **Hot & Humid Days** (bar chart of extreme weather events), **Geo Heatmap** (2° lat/lon grid table with temperature/pressure)
+- 16 tests in `tests/test_m4_api.sh` (API endpoints, 400 validation, OpenAPI docs, TTL, query_log, Grafana UI, datasource)
+
 ## Milestone 3 — Kafka Ingestion Pipeline (2026-03-13)
 
 - `kafka/producer/producer.py` — Python producer streams the Sensor.Community BMP180 S3 dataset into the `sensor-readings` Kafka topic; supports `REPLAY_SPEED`, `ROW_LIMIT`, and `SENSOR_TYPE_FILTER` env vars; publishes JSON with `acks=all`, gzip compression, and `sensor_id` as the message key

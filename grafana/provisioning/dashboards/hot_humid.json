@@ -1,0 +1,131 @@
+{
+  "title": "Hot Days",
+  "uid": "sensorhouse-hot-humid",
+  "description": "Extreme temperature events — days with readings above 35°C (BMP180 dataset; no humidity data).",
+  "refresh": "10m",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["sensorhouse", "weather"],
+  "time": {"from": "2019-01-01T00:00:00Z", "to": "2020-01-01T00:00:00Z"},
+  "timepicker": {},
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "title": "Extreme Heat Events",
+      "type": "row"
+    },
+    {
+      "id": 2,
+      "title": "Days with Temperature ≥ 35°C",
+      "description": "Count of readings per day where temperature exceeded 35°C (BMP180 sensors; humidity not available in this dataset).",
+      "type": "barchart",
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 1},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT toString(toYYYYMMDD(timestamp)) AS day, count() AS events FROM sensors.readings WHERE temperature >= 35 AND temperature <= 60 GROUP BY day ORDER BY day",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "orientation": "auto",
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 0,
+        "barRadius": 0,
+        "groupWidth": 0.7,
+        "barWidth": 0.97,
+        "stacking": "none",
+        "fillOpacity": 80,
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "fixed", "fixedColor": "red"},
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{"color": "green", "value": null}, {"color": "red", "value": 80}]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Max Temperature Recorded",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 13},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT round(max(temperature), 1) AS max_temp FROM sensors.readings WHERE temperature <= 60",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "color": {"mode": "fixed", "fixedColor": "red"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "Sensors Reporting Extreme Heat",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 13},
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "PDEE91DDB90597936"},
+          "rawSql": "SELECT uniq(sensor_id) AS sensors FROM sensors.readings WHERE temperature >= 35 AND temperature <= 60",
+          "refId": "A",
+          "format": 1,
+          "queryType": "sql"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "fixed", "fixedColor": "orange"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": []
+      }
+    }
+  ]
+}
