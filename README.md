@@ -13,8 +13,8 @@ A sensor data ingestion and visualization platform built with Kafka, ClickHouse,
 | Grafana | Dashboards | 3000 |
 | API | REST API (FastAPI) | 8000 |
 
-## Quick Start[MILESTONE_2.md](docs/MILESTONE_2.md)
-[MILESTONE_1.md](docs/MILESTONE_1.md)[MILESTONE_2.md](docs/MILESTONE_2.md)
+## Quick Start
+
 ```bash
 cp .env.example .env
 docker compose up -d --build
@@ -24,7 +24,8 @@ Wait ~60s for Kafka to be ready, then verify:
 
 ```bash
 docker compose ps
-bash tests/test_m1_infrastructure.sh
+bash tests/test_m1_infrastructure.sh   # 9 infrastructure checks
+bash tests/test_m2_schema.sh           # 9 schema checks (requires ClickHouse init to complete)
 ```
 
 ## Endpoints
