@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Environment — never commit real credentials
+.env
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude Code — contains personal paths and tokens
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+*.zip
